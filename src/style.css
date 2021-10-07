@@ -1,0 +1,23 @@
+main {
+    text-align: center;
+}
+
+.container {
+    width: 80%;
+}
+
+.box { 
+    padding: .35rem;
+}
+
+.box:not(:last-child), .card .media:not(:last-child) {
+    margin-bottom: .75rem;
+}
+
+.media {
+    padding-top: 1.15rem;
+}
+
+.card-content {
+    padding: 1.5rem 0;
+}
