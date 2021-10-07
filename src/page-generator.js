@@ -5,8 +5,6 @@ const Engineer = require('../lib/Engineer');
 const Intern = require('../lib/Intern');
 const Manager = require('../lib/Manager');
 
-testData = [["Manager","Jane Smith",1,"janey@fakemail.com","205"],["Engineer","JJ Jameson",2,"ihatespiderman@fakemail.com","ihatespiderman"],["Engineer","Seto Kaiba",3,"ceo@fakemail.com","blueeyeswhitedragon"],["Intern","Napoleon Bonaparte",4,"france@fakemail.com","Saint Helena University"],["Employee","Scruffy",5,"thejanitor@fakemail.com"]];
-
 const writeFile = fileContent => {
     return new Promise((resolve, reject) => {
         fs.writeFile('dist/index.html', fileContent, err => {
@@ -26,19 +24,89 @@ const writeFile = fileContent => {
     });
 };
 
+const copyFile = () => {
+    return new Promise((resolve, reject) => {
+        if (!fs.existsSync(`dist/`)){
+            fs.mkdirSync(`dist/`);
+        }
+        fs.copyFile('src/style.css' , 'dist/style.css', err => {
+            //if there's an error, reject the Promise and send the error to the Promise's `.catch()` method
+            if (err) {
+                reject(err);
+                // return out of the function here to make sure the Promise doesn't accidentally execute the resolve() function as well
+                return;
+            }
+
+            // if everything went well, resolve the Promise and send the successful data to the `.then()` method
+            resolve({
+                ok: true,
+                message: 'File Copied!'
+            });
+        });
+    });
+};
+
 const generateMembers = cardArray => {
+    //objects to dynamically reference constructors and functions
     const constructors = {
         Employee: Employee,
         Engineer: Engineer,
         Intern: Intern,
         Manager: Manager
+    };
+    const functions = {
+        Engineer: "getGitHub",
+        Intern: "getSchool",
+        Manager: "getOfficeNumber"
+    };
+    const icons = {
+        Manager: `<i class="bi bi-person-circle"></i>`,
+        Engineer: `<i class="bi bi-tools"></i>`,
+        Intern: `<i class="bi bi-book-half"></i>`,
+        Employee: `<i class="bi bi-person-fill"></i>`
     }
+
+    //initialize string
+    memberString = ``;
+
+
     cardArray.forEach(employeeObj => {
         [role, name, id, email, extra] = employeeObj;
         let employee = Boolean(extra) ? new constructors[role](name, id, email, extra) : new constructors[role](name, id, email);
-
-        console.log(employee.getRole());
+        let extraHTML = ``;
+        switch(employee.getRole()) {
+            case "Employee":
+                break;
+            case "Engineer":
+                extraHTML = `<div class = "box has-background-grey-lighter">${employee.getGitHub()}</div>`
+                break;
+            case "Intern":
+                extraHTML = `<div class = "box has-background-grey-lighter">${employee.getSchool()}</div>`
+                break;
+            case "Manager":
+                extraHTML = `<div class = "box has-background-grey-lighter">${employee.getOfficeNumber()}</div>`
+                break;
+        }
+        memberString += `
+        <div class = "card col-sm-10 col-md-5 col-lg-3 m-3 has-background-light">
+            <div class="card-content">
+            <div class="box media has-background-info">
+                <div class="media-content">
+                <p class="title is-4">${employee.getName()}</p>
+                <p class="subtitle is-5">${icons[employee.getRole()]} ${employee.getRole()}</p>
+                </div>
+            </div>
+        
+            <div class="content">
+                <div class = "box has-background-grey-lighter">${employee.getID()}</div>
+                <div class = "box has-background-grey-lighter">Email: <a href = "mailto:${employee.getEmail()}">${employee.getEmail()}</a></div>
+                ${extraHTML}
+            </div>
+            </div>
+        </div>
+        `;
     });
+    return memberString;
 };
 
 const generatePage = cardArray => {
@@ -76,9 +144,8 @@ const generatePage = cardArray => {
 </body>
 </html>
 `
-
-    //writeFile(pageHTML);
+    copyFile();
+    writeFile(pageHTML);
 };
 
-generatePage(testData);
 module.exports = generatePage;
